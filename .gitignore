@@ -1,0 +1,37 @@
+
+# Ignore system-specific files
+.DS_Store
+Thumbs.db
+
+# Backup files
+*~
+*.swp
+*.bak
+*.tmp
+
+# Python cache
+*.pyc
+__pycache__/
+*/__pycache__/
+
+# Build artifacts
+*.egg-info/
+build/
+
+# Cython compiled
+*.so
+*.pyd
+
+# Venv
+venv/
+.venv/
+env/
+.env/
+
+.obsidian/
+
+data/raw/
+*/docs/build/
+/docs/build/
+
+*.ipynb_checkpoints/

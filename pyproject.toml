@@ -1,0 +1,43 @@
+[build-system]
+requires = ["setuptools >= 80.0.0", "setuptools_scm>=8.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "womens-wc"
+dynamic = ["version"]
+dependencies = [
+    "ipykernel>=7.1.0",
+    "jupyter>=1.1.1",
+    "matplotlib>=3.10.8",
+    "pandas>=2.3.3",
+    "scikit-learn>=1.7.2",
+]
+requires-python = ">=3.10"
+authors = [
+	{name="Siddhant Sharma", email="sharmasiddhant@protonmail.com" },
+]
+description = "The project aims to predict match outcomes for the recent Women's Cricket World Cup 2025 using historical match data for matches between Women's Cricket World Cup 2022 and Women's Cricket World Cup 2025."
+readme = "README.md"
+license = "MIT"
+license-files = ["LICENSE"]
+keywords = []
+
+[tool.setuptools_scm]
+local_scheme="no-local-version"
+fallback_version = "0.0.0"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[project.urls]
+Repository = "https://github.com/shsiddhant/womens-wc"
+Issues = "https://github.com/shsiddhant/womens-wc/issues"
+Changelog = "https://github.com/shsiddhant/womens-wc/blob/main/CHANGELOG.md"
+
+[project.optional-dependencies]
+dev = [
+    "mypy>=1.18.2",
+    "pre-commit>=4.3.0",
+    "pytest>=8.4.2",
+    "ruff>=0.14.0",
+]
