@@ -74,9 +74,6 @@ To keep the repository lightweight, raw data files are not included in the repos
 
 2. Unzip and place the JSON files inside `data/raw`.
 
-3. Run the data processing (as explained in the notebook) scripts to generate
-processed data.
-
 ---
 ## Data Processing
 
@@ -91,6 +88,7 @@ From these, a match-level feature dataset is derived.
 
 Both the base dataset and feature dataset have been saved as parquet files, and can be found inside `data/processed` - `base_dataset.parquet` and
 `features_dataset.parquet`.
+You can generate them from raw data using the data processing scripts (as explained in the notebook) .
 
 #### Base Dataset Schema
 
@@ -130,7 +128,7 @@ spin/pace bowling strengths etc.
 ---
 ## Roadmap
 
-- [ ] Build Features.
+- [x] Build Features.
 - [ ] Exploratory Data Analysis
 - [ ] Train simple ML models
 - [ ] Evaluate model performance
