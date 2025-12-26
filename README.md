@@ -2,7 +2,7 @@
 
 ## Overview
 
-The project aims to predict match outcomes for the recent **Women's Cricket World Cup
+The project aims to predict match outcomes for the recently concluded **Women's Cricket World Cup
 2025** using historical match data for matches between Women's Cricket World Cup 2022 and Women's Cricket World Cup 2025.
 
 Raw ball-by-ball data is sourced from [Cricsheet](https://cricsheet.org/) and
