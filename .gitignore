@@ -33,5 +33,5 @@ env/
 data/raw/
 */docs/build/
 /docs/build/
-
+notebooks/playground.ipynb
 *.ipynb_checkpoints/

@@ -45,7 +45,7 @@ def win_percentage(
     return (
         100
         * (weighted_stats[f"wins_{n}"][filter_zeros])
-        / (weighted_stats["matches_{n}"][filter_zeros])
+        / (weighted_stats[f"matches_{n}"][filter_zeros])
     )
 
 
@@ -135,16 +135,18 @@ def build_features(
     df = base_df[["team_0", "team_1"]][filter_zeros].copy()
     for n in [0, 1]:
         df[f"home_adv_{n}"] = home_advantage(base_df, n)[filter_zeros]
+        df[f"win_percentage_{n}"] = win_percentage(weighted_stats, n, filter_zeros)
         df[f"batting_average_{n}"] = batting_average(weighted_stats, n, filter_zeros)
         df[f"batting_sr_{n}"] = batting_strike_rate(weighted_stats, n, filter_zeros)
         df[f"bowling_average_{n}"] = bowling_average(weighted_stats, n, filter_zeros)
         df[f"bowling_economy_{n}"] = bowling_economy(weighted_stats, n, filter_zeros)
     df = df.round(decimals=2)
+    return df
 
 
 def main():
     base_df = pd.read_parquet(DATA_DIRECTORY / "processed" / "base_dataset.parquet")
-    with open("./data/teams_list.json") as fp:
+    with open(DATA_DIRECTORY / "teams_list.json") as fp:
         teams = json.load(fp)
     weight = expweights_list(base_df, half_life=180)
     df = build_features(base_df, teams, weight)

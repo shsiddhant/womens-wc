@@ -36,8 +36,8 @@ def weighted_cumsum(
     ser_1: pd.Series,
     weight: pd.Series,
     teams: list[str],
-    is_team_0: pd.Series,
-    is_team_1: pd.Series,
+    is_team_0: dict[str, pd.Series],
+    is_team_1: dict[str, pd.Series],
 ) -> np.ndarray:
     """
     Calculate weighted cumulative sums for numeric features.
@@ -58,7 +58,7 @@ def weighted_cumsum(
         matches when the team played as team_0.
         For example: ``is_team["India"] = (base_df.team_0 == "India")``
      is_team_1 : dict[str, pd.Series]
-        Exactly like is_team_1.
+        Exactly like is_team_0 except it's for team_1.
 
     Note: All four must have the same index.
 
@@ -93,6 +93,10 @@ def weighted_cumsum_column(
     n: Literal[0, 1] = 0,  # 0 for team_0 and 1 for team_1
 ) -> np.ndarray:
     m = int(is_bowling_side)
+    # For bowling side stats, 0 and 1 are switched.
+    # For example, if column = 'runs', then if,
+    # 1. is_bowling_side == True, the weighted cumsum is for runs conceded.
+    # 2. is_bowling_side == False, the weighted cumsum is for runs scored.
     if n in [0, 1]:
         return weighted_cumsum(
             base_df[f"{column}_{m}"],
@@ -184,7 +188,7 @@ def drop_zeros_in_denominator(
     is_team_1: dict[str, pd.Series],
 ):
     # Initialize filtering condition
-    condition = base_df.team_0 == 0
+    condition = [False] * len(base_df)
     for n in [0, 1]:
         weighted_stats = weighted_agg_stats(
             base_df, weight, teams, is_team_0, is_team_1
