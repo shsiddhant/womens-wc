@@ -81,6 +81,10 @@ def main():
     base_df = base_df.reset_index()
     base_df = base_df.drop(columns=["index"])
     base_df.to_parquet(DATA_DIRECTORY / "processed" / "base_dataset.parquet")
+    print(
+        "Base dataset created and saved to "
+        f"{DATA_DIRECTORY / 'processed' / 'base_dataset.parquet'}"
+    )
 
 
 if __name__ == "__main__":
