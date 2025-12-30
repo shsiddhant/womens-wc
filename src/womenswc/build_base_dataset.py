@@ -65,21 +65,36 @@ def build_db(
     historial_datadir: Path = HISTORICAL_DATA,
 ):
     json_files = list(historial_datadir.glob("*.json"))
-    return pd.DataFrame.from_records(
+    base_df = pd.DataFrame.from_records(
         get_match_data_vec(json_files, city_to_country)
     ).dropna()
+    base_df["start_date"] = pd.to_datetime(base_df.start_date)
+    base_df = base_df.sort_values(by=["start_date"])
+    base_df = base_df[base_df.start_date.dt.year >= 2022]
+    base_df = base_df.reset_index()
+    base_df = base_df.drop(columns=["index"])
+    return base_df
 
+# Randomly Swap Labels
+def swap_labels(base_df: pd.DataFrame, seed: int = 1712):
+    df = base_df.copy()
+    rng = np.random.default_rng(seed=seed)
+    mask = pd.Series(rng.choice([True, False], size=len(df)), index=df.index)
+    for col in df.columns:
+        if col.endswith("_0"):
+            col_1 = col[:-2] + "_1"
+            old_col_0 = df[col].copy()
+            df.loc[mask, col] = df.loc[mask, col_1]
+            df.loc[mask, col_1] = old_col_0.loc[mask]
+    df.loc[mask, "result"] = 1 - df.loc[mask, "result"]
+    return df
 
 def main():
     with open(DATA_DIRECTORY / "city-to-country.json", "r") as fp:
         city_to_country = json.load(fp)
     get_match_data_vec = np.vectorize(get_match_data_, otypes=[dict])
     base_df = build_db(get_match_data_vec, city_to_country)
-    base_df["start_date"] = pd.to_datetime(base_df.start_date)
-    base_df = base_df.sort_values(by=["start_date"])
-    base_df = base_df[base_df.start_date.dt.year >= 2022]
-    base_df = base_df.reset_index()
-    base_df = base_df.drop(columns=["index"])
+    base_df = swap_labels(base_df, 17120512)
     base_df.to_parquet(DATA_DIRECTORY / "processed" / "base_dataset.parquet")
     print(
         "Base dataset created and saved to "
