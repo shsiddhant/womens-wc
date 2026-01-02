@@ -10,6 +10,7 @@ from womenswc.weights_util import (
 )
 
 if TYPE_CHECKING:
+    from collections.abc import Callable
     import numpy as np
 
 # Features
@@ -119,6 +120,14 @@ def bowling_economy(
     )
 
 
+def delta_stats(
+    func: Callable[[dict, int, np.ndarray], pd.Series],
+    weighted_stats: dict,
+    filter_zeros: np.ndarray,
+):
+    return (func(weighted_stats, 0, filter_zeros)
+            - func(weighted_stats, 1, filter_zeros))
+
 def build_features(
     base_df: pd.DataFrame, teams: list[str], weight: pd.Series | np.ndarray
 ) -> pd.DataFrame:
@@ -131,15 +140,16 @@ def build_features(
     filter_zeros = drop_zeros_in_denominator(
         base_df, weight, teams, is_team_0, is_team_1
     )
-    df: pd.DataFrame
-    df = base_df[["team_0", "team_1"]][filter_zeros].copy()
-    for n in [0, 1]:
-        df[f"home_adv_{n}"] = home_advantage(base_df, n)[filter_zeros]
-        df[f"win_percentage_{n}"] = win_percentage(weighted_stats, n, filter_zeros)
-        df[f"batting_average_{n}"] = batting_average(weighted_stats, n, filter_zeros)
-        df[f"batting_sr_{n}"] = batting_strike_rate(weighted_stats, n, filter_zeros)
-        df[f"bowling_average_{n}"] = bowling_average(weighted_stats, n, filter_zeros)
-        df[f"bowling_economy_{n}"] = bowling_economy(weighted_stats, n, filter_zeros)
+    df = pd.DataFrame(index=base_df[filter_zeros].index)
+    df["home_advantage"] = home_advantage(base_df, 0)[filter_zeros]
+    for func in [
+            win_percentage,
+            batting_average,
+            batting_strike_rate,
+            bowling_average,
+            bowling_economy,
+    ]:
+        df[f"delta_{func.__name__}"] = delta_stats(func, weighted_stats, filter_zeros)
     df = df.round(decimals=2)
     return df
 
