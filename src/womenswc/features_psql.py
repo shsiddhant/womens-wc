@@ -33,10 +33,12 @@ def features (
     teams = tuple(teams)
     if len(teams) == 0:
         raise ValueError("Sequence must have atleast one value")
+    with open(features_script, "r") as file:
+        features_sql = file.read()
     try:
         with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
             cur.execute(
-                features_script,
+                features_sql,
                 (teams, teams, cutoff_date.date(), teams, teams, cutoff_date.date())
             )
             conn.commit()
