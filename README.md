@@ -1,34 +1,62 @@
-# Women's Cricket World Cup 2025 Outcome Prediction
+# Women’s Cricket World Cup Outcome Prediction
 
 ## Overview
 
-The project aims to predict match outcomes for the recently concluded **Women's Cricket World Cup
-2025** using historical match data for matches between Women's Cricket World Cup 2022 and Women's Cricket World Cup 2025.
+This project aims to predict match outcomes for the **Women’s Cricket World Cup 2025**
+using historical Women’s ODI (WODI) match data.
 
-Raw ball-by-ball data is sourced from [Cricsheet](https://cricsheet.org/) and
-transformed into match level feature dataset, each row representing a match.
+Raw ball-by-ball data from [Cricsheet](https://cricsheet.org/) is ingested into a
+**PostgreSQL relational database**, which serves as the primary source.
+Match-level features are generated directly from the database using SQL and Python
+and are then used to train and evaluate supervised machine learning models.
+
+The project is designed to mirror a real-world prediction workflow, where only
+information available *prior* to a match is used for training and evaluation.
 
 ---
+
 ## Problem Statement
 
-Given match-level features derived from ball-by-ball data, can we predict the outcome of a Women’s Cricket World Cup match?
+Given match-level features derived from historical ball-by-ball data,
+**can we predict the outcome of a Women’s Cricket World Cup match?**
 
-This is formulated as a **supervised learning** problem, where historical matches
-are used to train a model that will be evaluated on matches from the Women’s
-Cricket World Cup 2025.
+This is formulated as a **supervised learning** problem:
+
+* **Training data:** Matches played after the Women’s Cricket World Cup 2022 and before WC 2025
+* **Evaluation data:** Matches from the Women’s Cricket World Cup 2025
+
+Temporal cutoffs are enforced throughout the pipeline to prevent data leakage.
 
 ---
+
+## Project Workflow
+
+1. Ingest raw Cricsheet JSON data into PostgreSQL
+2. Normalize and transform ball-by-ball data using SQL
+3. Generate match-level features directly from the database using date cutoffs
+4. Optionally persist feature datasets for reproducibility and experimentation
+5. Train and evaluate machine learning models
+
+---
+
 ## Installation
+
+### Prerequisites
+
+* Python 3.10+
+* PostgreSQL 14+
+* Git
 
 ### 1. Clone the repository
 
 ```shell
 git clone https://github.com/shsiddhant/womens-wc.git
+cd womens-wc
 ```
 
-###  2. Install Dependencies
+### 2. Create and activate a virtual environment
 
-#### A. Using uv
+#### A. Using `uv`
 
 ```shell
 uv venv .venv --seed
@@ -36,7 +64,7 @@ source .venv/bin/activate
 uv sync
 ```
 
-#### B. Using pip
+#### B. Using `pip`
 
 ```shell
 python -m venv .venv
@@ -44,107 +72,214 @@ source .venv/bin/activate
 pip install .
 ```
 
-## Using the notebooks
+---
 
-Go to the cloned directory. Then activate the environment and run JupyterLab.
+## Data Source
+
+### Raw Data
+
+* **Source:** [Cricsheet](https://cricsheet.org/)
+* **Format:** JSON (one file per match)
+* **Granularity:** Ball-by-ball
+* **Coverage:** All available Women’s ODIs
+
+Raw data files are not included in the repository to keep it lightweight.
+
+### Obtaining Raw Data
+
+1. Download the WODI JSON files from
+   [https://cricsheet.org/downloads/](https://cricsheet.org/downloads/odis_female_json.zip)
+2. Unzip and place the files inside:
+
+```text
+data/raw/
+```
+
+---
+
+## Database and Data Pipeline
+
+This project uses PostgreSQL as the **canonical data store** for all cricket data.
+
+### Database Layer
+
+* **Database:** PostgreSQL
+* **Granularity:** Ball-by-ball
+* **Schema:** Normalized relational tables (matches, innings, deliveries, players, etc.)
+* **Coverage:** All Women’s ODIs available on Cricsheet
+
+---
+
+### SQL Scripts (`scripts/sql/`)
+
+The SQL scripts define the complete lifecycle of the data pipeline:
+
+1. **Initialization**
+
+   * Creates schemas, tables, constraints etc
+   * Intended to be run once per database
+
+2. **Ingestion and Transformation**
+
+   * Parses raw Cricsheet JSON data
+   * Inserts ball-by-ball data into normalized tables
+   * Applies data cleaning and transformations
+   
+
+3. **Feature Building**
+
+   * Aggregates ball-by-ball data into match-level features
+   * Uses parameterized SQL queries (`%s`) via psycopg2
+   * Produces feature-ready datasets for ML workflows
+   * Supports configurable date cutoffs
+
+All SQL queries use parameterized placeholders to safely handle dynamic inputs such as
+date ranges.
+
+---
+
+## Python Modules
+
+Python code lives in:
+
+```text
+src/womenswc/
+```
+
+These modules are responsible for:
+
+* Managing PostgreSQL connections
+* Executing SQL scripts with runtime parameters
+* Coordinating feature generation from the database
+
+Functions are designed to accept database connection objects, keeping database logic
+decoupled from execution context and improving reusability.
+
+---
+
+## Data Processing and Feature Engineering
+
+Raw ball-by-ball data is ingested into PostgreSQL and transformed using SQL queries.
+Match-level features are computed **directly from the database**, without creating
+an intermediate persisted base dataset.
+
+This design avoids duplication of data and keeps PostgreSQL as the single source of truth.
+
+---
+
+## Feature Dataset
+
+Each row in the feature dataset represents a single match, with features computed
+for both teams using only information available prior to the match date.
+
+### Team Representation and Bias Mitigation
+
+To avoid positional or ordering bias:
+
+* Teams are assigned to columns `team` and `opponent` **at random**.
+* Corresponding features (batting, bowling, win percentage, etc.) are aligned to
+  these randomized team assignments.
+
+This prevents the model from learning spurious patterns based on team ordering,
+home/away conventions, or alphabetical bias.
+
+---
+
+### Reproducibility vs Convenience
+
+There are two supported ways to work with the feature dataset:
+
+1. **Dynamic generation (recommended)**
+
+   * Features are built by querying PostgreSQL
+   * Fully customizable date cutoffs
+   * Prevents data leakage
+   * Requires a running database
+
+2. **Pre-generated dataset (convenience)**
+
+   * A snapshot of the feature table is included in the repository
+   * Allows notebooks to be run without PostgreSQL
+   * Feature definitions and date cutoffs are fixed
+
+The pre-generated feature dataset CSV can be found inside `data/processed/`
+
+For custom date ranges, feature modifications, or extension to new tournaments,
+the PostgreSQL-backed pipeline should be used.
+
+---
+
+### Design Note
+
+Feature datasets are intentionally snapshot-based when persisted to disk.
+This ensures experiments are reproducible even as the underlying database or
+feature logic evolves.
+
+---
+
+## Features (So Far)
+
+Features are computed for **both teams** in each match:
+
+1. Home advantage
+2. Weighted batting averages and strike rates
+3. Weighted bowling averages and economy rates
+4. Weighted historical win percentage
+
+The last three are relative/differential values for the team and the opponent.
+
+Future feature additions may include:
+
+* Venue-specific effects
+* Spin vs pace bowling strength
+* Opposition-adjusted metrics
+
+---
+
+## Using the Notebooks
+
+Activate the environment and launch JupyterLab:
 
 ```shell
 source .venv/bin/activate
 jupyter lab notebooks/
 ```
 
----
-## Data Source and Handling
+The notebooks can be run in two modes:
 
-### Raw Data
+* **Offline mode:** Load the pre-generated feature dataset from
+  `data/processed/`
+* **Database-backed mode:** Query PostgreSQL to dynamically generate features using
+  custom date cutoffs
 
-- **Source:** [Cricsheet](https://cricsheet.org/)
-- **Format:** JSON (one file per match)
-- **Type:** Ball-by-ball
-- **Count:** 159 (some will be ignored, see below for explanation)
-- **Scope:** 
-	- Only the matches between the eight teams that participated in the Women's Cricket World Cup 2025 will be considered.
-	- Only matches after World Cup 2022 are considered.
-
-To keep the repository lightweight, raw data files are not included in the repository. You can obtain it with the following steps.
-
-### Obtaining the Raw Data
-
-1. Download zipped JSON data from [Cricsheet](https://cricsheet.org/downloads/) for WODIs.
-
-2. Unzip and place the JSON files inside `data/raw`.
-
----
-## Data Processing
-
-### Base Dataset
-
-The base dataset is a **match-level dataset**, where each row represents a single 
-match. Raw ball-by-ball JSON data is parsed and transformed to create the base dataset.
-
-The base dataset contains match information such as team names, venue, date, etc. and
-foundational match statistics such as runs scored, wickets taken, deliveries played.
-From these, a match-level feature dataset is derived.
-
-Both the base dataset and feature dataset have been saved as parquet files, and can be found inside `data/processed` - `base_dataset.parquet` and
-`features_dataset.parquet`.
-You can generate them from raw data using the data processing scripts (as explained in the notebook) .
-
-#### Base Dataset Schema
-
-**Note:** The indexing 0 and 1 is decided alphabetically. So if the match is between, say India and England, then team_0 would be England and team_1 would be India.
-
-| Column Name      | Description                                                                                                               |
-| :--------------- | :------------------------------------------------------------------------------------------------------------------------ |
-| match_id         | A unique id for the match derived from file name. For example, a match id 1490443 corresponds to the file '1490443.json'. |
-| country          | The country where the match venue is located.                                                                             |
-| start_date       | Match start date.                                                                                                         |
-| team_0           | The first team playing the match (teams ordered alphabetically).                                                          |
-| team_1           | The second team playing the match.                                                                                        |
-| toss_winner      | Toss winner - 0 if team_0 wins the toss, otherwise 1.                                                                     |
-| toss_decision    | Decision taken by the team that won the toss - 0 if they decide to bat first, otherwise 1.                                |
-| runs_0 (1)       | Runs scored by team_0 (1)                                                                                                 |
-| wickets_0 (1)    | Wickets lost by team_0 (1)                                                                                                |
-| deliveries_0 (1) | Deliveries played by team_0 (1)                                                                                           |
-| result           | Result of the game - 0 if team_0 wins and 1 if team_1 wins. Tied matches and matches with no result are not considered.   |
+By default, notebooks use the pre-generated dataset for ease of use.
 
 ---
 
-## Features (So far)
-
-1. Home Advantage
-
-2. Weighted Batting Averages and Strike-rates
-
-3. Weighted Bowling Averages and Economy.
-
-4. Weighted Win Percentage.
-
-The last three are calculated for both teams.
-
-**Note:** Feature set may evolve in future with additions to model venue conditions,
-spin/pace bowling strengths etc.
-
----
 ## Roadmap
 
-- [x] Build Features.
-- [ ] Exploratory Data Analysis
-- [ ] Train simple ML models
-- [ ] Evaluate model performance
-- [ ] Document results
+* [x] Build PostgreSQL-backed data pipeline
+* [x] Feature engineering
+* [ ] Exploratory data analysis
+* [ ] Train baseline ML models
+* [ ] Evaluate model performance
+* [ ] Document results and insights
 
 ---
+
 ## Tools and Libraries
 
-- Python
-- pandas
-- numpy
-- matplotlib
-- scikit-learn
-- jupyter
-
+* Python
+* PostgreSQL
+* pandas
+* numpy
+* matplotlib
+* scikit-learn
+* psycopg2
+* Jupyter
 
 ---
+
 ## License
+
 [![LICENSE: MIT](https://img.shields.io/badge/LICENSE-MIT-green?style=for-the-badge)](LICENSE)
