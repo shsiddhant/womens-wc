@@ -1,0 +1,11 @@
+
+version: 2
+
+sources:
+  - name: raw_data
+    schema: public
+    tables:
+      - name: raw_json
+      - name: deliveries_json
+      - name: city_country
+

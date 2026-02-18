@@ -42,3 +42,4 @@ notebooks/playground.ipynb
 */target/
 */dbt_packages/
 */logs/
+logs/
