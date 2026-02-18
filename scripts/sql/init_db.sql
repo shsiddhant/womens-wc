@@ -9,12 +9,22 @@ players,
 teams,
 venues,
 city_country,
-json_table;
+json_table,
+stage_deliveries;
 
 CREATE TABLE json_table (
     id SERIAL,
     data JSONB,
     PRIMARY KEY (id)
+);
+
+CREATE TABLE stage_deliveries (
+    match_id INT,
+    n_innings INT,
+    team TEXT,
+    n_over INT,
+    n_delivery INT,
+    delivery JSONB
 );
 
 -- venue name column is only used if city name is missing in match JSON
@@ -34,14 +44,16 @@ CREATE TABLE venues (
     city TEXT,
     country TEXT NOT NULL,
     last_update TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP NOT NULL,
-		PRIMARY KEY (venue_id)
+    PRIMARY KEY (venue_id),
+    UNIQUE (venue_name)
 );
 
 CREATE TABLE teams (
     team_id SERIAL PRIMARY KEY,
-    team_name TEXT NOT NULL,
+    team TEXT NOT NULL,
     format TEXT NOT NULL,
-    UNIQUE (team_name, format)
+    last_update TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    UNIQUE (team, format)
 );
 
 CREATE TABLE players (
@@ -72,20 +84,23 @@ CREATE TABLE match_teams (
     match_team_id SERIAL,
     match_id INTEGER,
     format TEXT NOT NULL,
-    team_name TEXT NOT NULL,
+    team TEXT NOT NULL,
     opp_name TEXT NOT NULL,
     is_home boolean,
     batted_first boolean,
     won_match boolean,
     PRIMARY KEY (match_team_id),
+    UNIQUE (match_id, team),
     CONSTRAINT match_teams_match_id_fk FOREIGN KEY (match_id) REFERENCES matches(match_id)
 );
 
 CREATE TABLE deliveries (
     match_id INTEGER NOT NULL,
     innings_number INTEGER NOT NULL,
-    team_name TEXT NOT NULL,
+    team TEXT NOT NULL,
     opp_name TEXT, -- NOT NULL,
+    over_number INT NOT NULL,
+    ball_in_over INT NOT NULL,
     is_legal BOOLEAN,
     runs INTEGER,
     wides INTEGER,
@@ -93,26 +108,27 @@ CREATE TABLE deliveries (
     byes INTEGER,
     legbyes INTEGER,
     extras INTEGER,
-    batter_id TEXT NOT NULL,
-    bowler_id TEXT NOT NULL,
+    batter TEXT NOT NULL,
+    bowler TEXT NOT NULL,
     player_out TEXT,
     dismissal_mode TEXT,
+    UNIQUE (match_id, innings_number, over_number, ball_in_over),
     CONSTRAINT deliveries_match_fk
         FOREIGN KEY (match_id)
-        REFERENCES matches(match_id),
-    CONSTRAINT deliveries_batter_fk
-        FOREIGN KEY (batter_id)
-        REFERENCES players(player_id),
-    CONSTRAINT deliveries_bowler_fk
-        FOREIGN KEY (bowler_id)
-        REFERENCES players(player_id)
+        REFERENCES matches(match_id)--,
+    -- CONSTRAINT deliveries_batter_fk
+    --     FOREIGN KEY (batter)
+    --     REFERENCES players(player_name),
+    -- CONSTRAINT deliveries_bowler_fk
+    --     FOREIGN KEY (bowler)
+    --     REFERENCES players(player_name)
 );
 
 CREATE TABLE innings (
     innings_id SERIAL,
     match_id INTEGER,
     innings_number INTEGER NOT NULL,
-    team_name TEXT NOT NULL,
+    team TEXT NOT NULL,
     opp_name TEXT, -- NOT NULL,
     runs_scored INTEGER,
     wickets_lost INTEGER,

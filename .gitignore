@@ -35,3 +35,10 @@ data/raw/
 /docs/build/
 notebooks/playground.ipynb
 *.ipynb_checkpoints/
+
+
+# dbt
+
+*/target/
+*/dbt_packages/
+*/logs/

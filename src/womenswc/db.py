@@ -1,6 +1,10 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING
-from womenswc.copy_from_files import city_country_table, copy_json_to_table
+from womenswc.copy_from_files import (
+    city_country_table,
+    copy_json_to_table,
+    copy_deliveries_json,
+)
 
 if TYPE_CHECKING:
     import psycopg2
@@ -60,8 +64,28 @@ def insert_from_json(
         The path to the SQL script for inserting data into database tables.
 
     """
+    with conn.cursor() as cur:
+        cur.execute(
+            """
+            SELECT
+            match_id::text
+            FROM matches
+            """)
+        existing_id_list = cur.fetchall()
+        cur.execute(
+            """
+            CREATE TEMPORARY TABLE json_table (
+            id SERIAL,
+            data JSONB,
+            PRIMARY KEY (id)
+        );
+            """)
+    for match_json in json_files:
+        if (match_json.name.removesuffix(".json"),) in existing_id_list:
+            json_files.remove(match_json)
     copy_json_to_table(conn, json_files, "json_table")
     city_country_table(conn, city_country_csv)
+    copy_deliveries_json(conn, json_files)
     with open(insert_data_script, "r") as file:
         sql = file.read()
     try:
@@ -72,6 +96,30 @@ def insert_from_json(
         print(e)
         raise conn.Error(e)
 
+
+def update_db(
+    conn: psycopg2.extensions.connection,
+    json_files,
+    city_country_csv,
+    insert_data_script: str | Path,
+):
+    """
+    Update database.
+
+    conn : psycopg2.extensions.connection.
+    json_files : list containing str or Path objects.
+        A list containing the paths to the match JSON files.
+        A psycopg2 connection to the database.
+    city_country_csv : str, Path
+        The path to CSV containing the city_country dictionary.
+    insert_sql_script : str, Path
+        The path to the SQL script for inserting data into database tables.
+
+    """
+
+    with conn:
+        insert_from_json(conn, json_files, city_country_csv, insert_data_script)
+
 def reinit_db(
     conn: psycopg2.extensions.connection,
     init_path,
@@ -79,6 +127,10 @@ def reinit_db(
     city_country_csv,
     insert_data_script: str | Path,
 ):
+    """
+    Rebuild database from scratch.
+    """
+
     try:
         with conn:
             cur = conn.cursor()
