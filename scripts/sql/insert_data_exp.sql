@@ -14,7 +14,7 @@ SELECT
 
 
 INSERT INTO teams (team, format)
-SELECT DISTINCT 
+SELECT DISTINCT
 t.team,
 data->'info'->>'match_type'
 FROM json_table
@@ -56,7 +56,7 @@ data->'info'->'outcome'->'by',
 data->'info'->'outcome'->>'winner',
 data->'info'->>'player_of_match'
 FROM json_table
-JOIN venues v
+LEFT JOIN venues v
 ON data->'info'->>'venue' = v.venue_name
 ON CONFLICT (match_id) DO NOTHING;
 
@@ -88,7 +88,7 @@ INSERT INTO deliveries (
 match_id,
 innings_number,
 team,
-opp_name,
+--opp_name,
 over_number,
 ball_in_over,
 runs,
@@ -97,47 +97,33 @@ noballs,
 byes,
 legbyes,
 extras,
-batter_id,
-bowler_id,
+batter,
+bowler,
 is_legal,
 player_out,
 dismissal_mode)
 
 SELECT
-mt.match_id AS match_id,
-i.position AS innings_number,
-mt.team AS team,
-mt.opp_name AS opp_name,
-ov.position AS over_number,
-d.position AS ball_in_over,
-COALESCE ((d.delivery->'runs'->'total')::integer, 0),
-COALESCE ((d.delivery->'extras'->'wides')::integer, 0),
-COALESCE ((d.delivery->'extras'->'noballs')::integer, 0),
-COALESCE ((d.delivery->'extras'->'byes')::integer, 0),
-COALESCE ((d.delivery->'extras'->'legbyes')::integer, 0),
-COALESCE ((d.delivery->'runs'->'extras')::integer, 0),
-rb.value AS batter_id,
-rw.value AS bowler_id,
-((d.delivery->'extras'->'wides') IS NULL) AND
-((d.delivery->'extras'->'noballs') IS NULL),
-d.delivery->'wickets'->0->>'player_out',
-d.delivery->'wickets'->0->>'kind'
-FROM json_table
-CROSS JOIN LATERAL jsonb_array_elements(data->'innings')
-  WITH ORDINALITY AS i(innings, position)
-JOIN match_teams mt
-  ON mt.match_id = (data->'match_id')::integer AND i.innings->>'team' = mt.team
-CROSS JOIN LATERAL jsonb_array_elements(i.innings->'overs')
-    WITH ORDINALITY AS ov(over, position)
-CROSS JOIN LATERAL jsonb_array_elements(ov.over->'deliveries')
-    WITH ORDINALITY AS d(delivery, position)
-JOIN jsonb_each_text(data->'info'->'registry'->'people') rb
-  ON rb.key = d.delivery->>'batter'
-JOIN jsonb_each_text(data->'info'->'registry'->'people') rw
-  ON rw.key = d.delivery->>'bowler'
+st.match_id AS match_id,
+st.n_innings AS innings_number,
+st.team AS team,
+st.n_over AS over_number,
+st.n_delivery AS ball_in_over,
+COALESCE ((st.delivery->'runs'->'total')::integer, 0),
+COALESCE ((st.delivery->'extras'->'wides')::integer, 0),
+COALESCE ((st.delivery->'extras'->'noballs')::integer, 0),
+COALESCE ((st.delivery->'extras'->'byes')::integer, 0),
+COALESCE ((st.delivery->'extras'->'legbyes')::integer, 0),
+COALESCE ((st.delivery->'runs'->'extras')::integer, 0),
+st.delivery->>'batter',
+st.delivery->>'bowler',
+((st.delivery->'extras'->'wides') IS NULL) AND
+((st.delivery->'extras'->'noballs') IS NULL),
+st.delivery->'wickets'->0->>'player_out',
+st.delivery->'wickets'->0->>'kind'
+FROM stage_deliveries st
 ON CONFLICT DO NOTHING;
 
-EXPLAIN ANALYZE
 INSERT INTO innings(
     match_id,
     innings_number,
