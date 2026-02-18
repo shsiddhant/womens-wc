@@ -1,0 +1,152 @@
+
+version: 2
+
+models:
+  - name: venues
+    description: "Venues table"
+    columns:
+      - name: venue_id
+        description: "The primary key for this table"
+        data_tests:
+          - dbt_constraints.primary_key
+      
+      - name: venue_name
+        data_tests: [not_null]
+      
+      - name: country
+        data_tests: [not_null]
+      
+      - name: last_update
+        data_tests: [not_null]
+
+  - name: teams
+    description: "Teams table"
+    columns:
+      - name: team_id
+        tests:
+          - dbt_constraints.primary_key
+
+      - name: team
+        data_tests: [not_null]
+
+      - name: format
+        data_tests: [not_null]
+
+      - name: last_update
+        data_tests: [not_null]
+
+    tests:
+      - dbt_constraints.unique_key:
+          arguments:
+            column_names: [team, format]
+
+  - name: players
+    columns:
+      - name: player_id
+        tests:
+          - dbt_constraints.primary_key
+
+      - name: player_name
+        data_tests: [not_null]
+
+      - name: team_id
+        tests:
+          - dbt_constraints.foreign_key:
+              arguments:
+                pk_table_name: ref('teams')
+                pk_column_name: 'team_id'
+  - name: matches
+    columns:
+      - name: match_id
+        tests:
+          - dbt_constraints.primary_key
+
+      - name: venue_id
+        tests:
+          - dbt_constraints.foreign_key:
+              arguments:
+                pk_table_name: ref('venues')
+                pk_column_name: 'venue_id'
+
+      - name: start_date
+        data_tests: [not_null]
+
+      - name: outcome_type
+        data_tests: [not_null]
+
+  - name: match_teams
+    columns:
+      - name: match_team_id
+        tests:
+          - dbt_constraints.primary_key
+
+      - name: match_id
+        tests:
+          - dbt_constraints.foreign_key:
+              arguments:
+                pk_table_name: ref('matches')
+                pk_column_name: 'match_id'
+
+      - name: format
+        data_tests: [not_null]
+
+      - name: team
+        data_tests: [not_null]
+      
+      - name: opponent
+        data_tests: [not_null]
+    
+    tests:
+      - dbt_constraints.unique_key:
+          arguments:
+            column_names: [match_id, team]
+
+
+  - name: deliveries
+    columns:
+      - name: match_id
+        tests:
+          - dbt_constraints.foreign_key:
+              arguments:
+                pk_table_name: ref('matches')
+                pk_column_name: 'match_id'
+
+      - name: innings_number
+        data_tests: [not_null]
+
+      - name: over_number
+        data_tests: [not_null]
+
+      - name: ball_in_over
+        data_tests: [not_null]
+      
+      - name: batter
+        data_tests: [not_null]
+
+      - name: bowler
+        data_tests: [not_null]
+    
+    tests:
+      - dbt_constraints.unique_key:
+          arguments:
+            column_names: [match_id, innings_number, over_number, ball_in_over]
+
+  - name: innings
+    columns:
+      - name: match_id
+        tests:
+          - dbt_constraints.foreign_key:
+              arguments:
+                pk_table_name: ref('matches')
+                pk_column_name: 'match_id'
+
+      - name: innings_number
+        data_tests: [not_null]
+
+      - name: team
+        data_tests: [not_null]
+
+    tests:
+      - dbt_constraints.unique_key:
+          arguments:
+            column_names: [match_id, innings_number]

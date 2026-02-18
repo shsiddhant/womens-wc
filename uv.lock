@@ -3976,6 +3976,8 @@ wheels = [
 name = "womens-wc"
 source = { editable = "." }
 dependencies = [
+    { name = "dbt-core" },
+    { name = "dbt-postgres" },
     { name = "fastparquet" },
     { name = "ipykernel" },
     { name = "jupyter" },
@@ -4002,7 +4004,9 @@ dev = [
 
 [package.metadata]
 requires-dist = [
+    { name = "dbt-core", specifier = ">=1.11.2" },
     { name = "dbt-core", marker = "extra == 'dev'", specifier = ">=1.11.2" },
+    { name = "dbt-postgres", specifier = ">=1.10.0" },
     { name = "dbt-postgres", marker = "extra == 'dev'", specifier = ">=1.10.0" },
     { name = "fastparquet", specifier = ">=2025.12.0" },
     { name = "ipykernel", specifier = ">=7.1.0" },
