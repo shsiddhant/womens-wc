@@ -34,5 +34,7 @@ clean-targets:         # directories to be removed by `dbt clean`
 models:
   dbt_cricket:
     # Config indicated by + and applies to all files under models/example/
+    staging:
+      +materialized: incremental
     intermediate:
-      +materialized: table
+      +materialized: incremental

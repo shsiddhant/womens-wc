@@ -1,105 +1,158 @@
-city;country;venue
-Adelaide;Australia;
-Ahmedabad;India;
-Auckland;New Zealand;
-Bengaluru;India;
-Benoni;South Africa;
-Brighton;England;
-Brisbane;Australia;
-Bristol;England;
-Canberra;Australia;
-Canterbury;England;
-Chelmsford;England;
-Chester-le-Street;England;
-Christchurch;New Zealand;
-Colombo;Sri Lanka;
-Delhi;India;
-Derby;England;
-Dhaka;Bangladesh;
-Dunedin;New Zealand;
-Durban;South Africa;
-East London;South Africa;
-Galle;Sri Lanka;
-Hamilton;New Zealand;
-Harare;Zimbabwe;
-Hobart;Australia;
-Kandy;Sri Lanka;
-Karachi;Pakistan;
-Kimberley;South Africa;
-Lahore;Pakistan;
-Leicester;England;
-London;England;
-Lucknow;India;
-Mackay;Australia;
-Melbourne;Australia;
-Mount Maunganui;New Zealand;
-Mumbai;India;
-Napier;New Zealand;
-Nelson;New Zealand;
-New Chandigarh;India;
-Northampton;England;
-Perth;Australia;
-Pietermaritzburg;South Africa;
-Potchefstroom;South Africa;
-Queenstown;New Zealand;
-Southampton;England;
-Sydney;Australia;
-Taunton;England;
-Wellington;New Zealand;
-Worcester;England;
-Almeria;Spain;
-Amstelveen;Netherlands;
-Bangalore;India;
-Bangkok;Thailand;
-Barbados;West Indies;
-Basseterre;West Indies;
-Belfast;Ireland;
-Bloemfontein;South Africa;
-Bowral;Australia;
-Bulawayo;Zimbabwe;
-Cave Hill;West Indies;
-Centurion;South Africa;
-Chennai;India;
-Chiang Mai;Thailand;
-Coffs Harbour;Australia;
-Coolidge;West Indies;
-Cox's Bazar;Bangladesh;
-Dallas;USA;
-Dubai;UAE;
-Dublin;Ireland;
-FTZ Sports Complex;Sri Lanka;
-Gros Islet;West Indies;
-Guwahati;India;
-Hambantota;Sri Lanka;
-Hove;England;
-Indore;India;
-Johannesburg;South Africa;
-Katunayake;Sri Lanka;
-Kuala Lumpur;Malaysia;
-Kurunegala;Sri Lanka;
-Leeds;England;
-Lincoln;New Zealand;
-Loughborough;England;
-Nagpur;India;
-Navi Mumbai;India;
-North Sound;West Indies;
-Paarl;South Africa;
-Port Moresby;Papua New Guinea;
-Pretoria;South Africa;
-Rajkot;India;
-Scarborough;England;
-The Hague;Netherlands;
-Utrecht;Netherlands;
-Vadodara;India;
-;Sri Lanka;Colombo Cricket Club Ground
-;Sri Lanka;Galle International Stadium
-;England;Louth Cricket Club
-;Australia;Melbourne Cricket Ground
-;Sri Lanka;Rangiri Dambulla International Stadium
-;UAE;Sharjah Cricket Stadium
-;West Indies;Sir Vivian Richards Stadium, North Sound
-;South Africa;Stellenbosch University 1
-;South Africa;Stellenbosch University 2
-;Australia;Sydney Cricket Ground
-Visakhapatnam;India;
-Wormsley;England;
+venue;city;country
+Adelaide Oval;Adelaide;Australia
+Allan Border Field;Brisbane;Australia
+Allan Border Field, Brisbane;Brisbane;Australia
+Amini Park, Port Moresby;Port Moresby;Papua New Guinea
+Arun Jaitley Stadium, Delhi;Delhi;India
+Barsapara Cricket Stadium, Guwahati;Guwahati;India
+Basin Reserve, Wellington;Wellington;New Zealand
+Bay Oval;Mount Maunganui;New Zealand
+Bay Oval, Mount Maunganui;Mount Maunganui;New Zealand
+Bellerive Oval;Hobart;Australia
+Bellerive Oval, Hobart;Hobart;Australia
+Bert Sutcliffe Oval;Lincoln;New Zealand
+Bharat Ratna Shri Atal Bihari Vajpai Ekana Cricket Stadium;Lucknow;India
+Bharat Ratna Shri Atal Bihari Vajpayee Ekana Cricket Stadium;Lucknow;India
+Boland Bank Park;Paarl;South Africa
+Boland Park;Paarl;South Africa
+Brabourne Stadium;Mumbai;India
+Bradman Oval;Bowral;Australia
+Buffalo Park;East London;South Africa
+Buffalo Park, East London;East London;South Africa
+Castle Avenue, Dublin;Dublin;Ireland
+Chilaw Marians Cricket Club Ground;FTZ Sports Complex;Sri Lanka
+City Oval, Pietermaritzburg;Pietermaritzburg;South Africa
+Civil Service Cricket Club, Stormont, Belfast;Belfast;Ireland
+Colombo Cricket Club Ground;;Sri Lanka
+Coolidge Cricket Ground, Antigua;Coolidge;West Indies
+County Ground;Hove;England
+County Ground, Bristol;Bristol;England
+County Ground, Chelmsford;Chelmsford;England
+County Ground, Derby;Derby;England
+County Ground, Hove;Brighton;England
+County Ground, New Road;Worcester;England
+County Ground, New Road, Worcester;Worcester;England
+County Ground, Northampton;Northampton;England
+Daren Sammy National Cricket Stadium, Gros Islet, St Lucia;Gros Islet;West Indies
+Desert Springs Cricket Ground, Almeria;Almeria;Spain
+Diamond Oval;Kimberley;South Africa
+Diamond Oval, Kimberley;Kimberley;South Africa
+Dr DY Patil Sports Academy, Navi Mumbai;Navi Mumbai;India
+Dr. Y.S. Rajasekhara Reddy ACA-VDCA Cricket Stadium, Visakhapatnam;Visakhapatnam;India
+Dubai International Cricket Stadium;Dubai;UAE
+Eden Park, Auckland;Auckland;New Zealand
+Eden Park No 2;Auckland;New Zealand
+Eden Park Outer Oval;Auckland;New Zealand
+FTZ Sports Complex (BOI);Katunayake;Sri Lanka
+Gaddafi Stadium, Lahore;Lahore;Pakistan
+Galle International Stadium;Galle;Sri Lanka
+Grace Road;Leicester;England
+Grace Road, Leicester;Leicester;England
+Grand Prairie Stadium, Dallas;Dallas;USA
+Hagley Oval;Christchurch;New Zealand
+Hagley Oval, Christchurch;Christchurch;New Zealand
+Harare Sports Club;Harare;Zimbabwe
+Harlequins;Pretoria;South Africa
+Haslegrave Ground;Loughborough;England
+Headingley;Leeds;England
+Holkar Cricket Stadium, Indore;Indore;India
+Hurstville Oval;Sydney;Australia
+ICC Academy;Dubai;UAE
+ICC Academy, Dubai;Dubai;UAE
+International Sports Stadium;Coffs Harbour;Australia
+John Davies Oval, Queenstown;Queenstown;New Zealand
+Junction Oval;Melbourne;Australia
+Junction Oval, Melbourne;Melbourne;Australia
+Karen Rolton Oval;Adelaide;Australia
+Kensington Oval, Bridgetown;Barbados;West Indies
+Khettarama Stadium;Colombo;Sri Lanka
+Kingsmead;Durban;South Africa
+Kingsmead, Durban;Durban;South Africa
+Kinrara Academy Oval;Kuala Lumpur;Malaysia
+Kotambi Stadium, Vadodara;Vadodara;India
+Lahore City Cricket Association Ground;Lahore;Pakistan
+Lord's;London;England
+Lord's, London;London;England
+Louth Cricket Club;;England
+MA Chidambaram Stadium, Chepauk;Chennai;India
+Maharaja Yadavindra Singh International Cricket Stadium, New Chandigarh;New Chandigarh;India
+Mahinda Rajapaksa International Cricket Stadium, Sooriyawewa;Hambantota;Sri Lanka
+Mahinda Rajapaksa International Cricket Stadium, Sooriyawewa, Hambantota;Hambantota;Sri Lanka
+Mangaung Oval;Bloemfontein;South Africa
+Manuka Oval;Canberra;Australia
+Manuka Oval, Canberra;Canberra;Australia
+M Chinnaswamy Stadium;Bangalore;India
+M Chinnaswamy Stadium, Bengaluru;Bengaluru;India
+McLean Park;Napier;New Zealand
+McLean Park, Napier;Napier;New Zealand
+Melbourne Cricket Ground;;Australia
+Narendra Modi Stadium, Ahmedabad;Ahmedabad;India
+National Stadium, Karachi;Karachi;Pakistan
+Nondescripts Cricket Club Ground;Colombo;Sri Lanka
+North Marine Road Ground;Scarborough;England
+North Sydney Oval;Sydney;Australia
+North Sydney Oval, Sydney;Sydney;Australia
+North-West University No1 Ground;Potchefstroom;South Africa
+Observatory Lane, Rathmines;Dublin;Ireland
+Old Hararians, Harare;Harare;Zimbabwe
+Pallekele International Cricket Stadium;Kandy;Sri Lanka
+Peter Burge Oval;Brisbane;Australia
+P Sara Oval;Colombo;Sri Lanka
+P Sara Oval, Colombo;Colombo;Sri Lanka
+Queens Sports Club, Bulawayo;Bulawayo;Zimbabwe
+Rangiri Dambulla International Stadium;;Sri Lanka
+Ray Mitchell Oval, Harrup Park, Mackay;Mackay;Australia
+Reliance Stadium;Vadodara;India
+Riverside Ground, Chester-le-Street;Chester-le-Street;England
+Royal Chiangmai Golf Club;Chiang Mai;Thailand
+R Premadasa Stadium;Colombo;Sri Lanka
+R Premadasa Stadium, Colombo;Colombo;Sri Lanka
+Saurashtra Cricket Association Stadium, Rajkot;Rajkot;India
+Saxton Oval;Nelson;New Zealand
+Saxton Oval, Nelson;Nelson;New Zealand
+Seddon Park;Hamilton;New Zealand
+Seddon Park, Hamilton;Hamilton;New Zealand
+Senwes Park;Potchefstroom;South Africa
+Senwes Park, Potchefstroom;Potchefstroom;South Africa
+Sharjah Cricket Stadium;;UAE
+Sheikh Kamal International Cricket Stadium;Cox's Bazar;Bangladesh
+Shere Bangla National Stadium, Mirpur;Dhaka;Bangladesh
+Sinhalese Sports Club Ground;Colombo;Sri Lanka
+Sinhalese Sports Club Ground, Colombo;Colombo;Sri Lanka
+Sinovich Park, Sinoville;Pretoria;South Africa
+Sir Paul Getty's Ground;Wormsley;England
+Sir Vivian Richards Stadium, Antigua;North Sound;West Indies
+Sir Vivian Richards Stadium, North Sound;;West Indies
+Sir Vivian Richards Stadium, North Sound, Antigua;North Sound;West Indies
+Southend Club Cricket Stadium;Karachi;Pakistan
+Southend Club Cricket Stadium, Karachi;Karachi;Pakistan
+Sportpark Maarschalkerweerd, Utrecht;Utrecht;Netherlands
+Sportpark Westvliet, The Hague;The Hague;Netherlands
+Stellenbosch University 1;;South Africa
+Stellenbosch University 2;;South Africa
+St George's Park, Gqeberha;Gqeberha;South Africa
+St Lawrence Ground;Canterbury;England
+St Lawrence Ground, Canterbury;Canterbury;England
+Sunrise Sports Club, Harare;Harare;Zimbabwe
+SuperSport Park;Centurion;South Africa
+Sydney Cricket Ground;;Australia
+Terdthai Cricket Ground, Bangkok;Bangkok;Thailand
+The Cooper Associates County Ground, Taunton;Taunton;England
+The Hills Cricket Club Ground;Dublin;Ireland
+The Rose Bowl, Southampton;Southampton;England
+The Vineyard;Dublin;Ireland
+The Wanderers Stadium, Johannesburg;Johannesburg;South Africa
+Three Ws Oval, Cave Hill, Barbados;Cave Hill;West Indies
+University Oval;Dunedin;New Zealand
+University Oval, Dunedin;Dunedin;New Zealand
+Vidarbha Cricket Association Stadium, Jamtha;Nagpur;India
+VRA Ground, Amstelveen;Amstelveen;Netherlands
+W.A.C.A. Ground;Perth;Australia
+Wankhede Stadium;Mumbai;India
+Wankhede Stadium, Mumbai;Mumbai;India
+Warner Park, Basseterre, St Kitts;Basseterre;West Indies
+Welagedara Stadium;Kurunegala;Sri Lanka
+Western Australia Cricket Association Ground, Perth;Perth;Australia
+Willowmoore Park;Benoni;South Africa
+Willowmoore Park, Benoni;Benoni;South Africa
+YMCA Cricket Club;Dublin;Ireland

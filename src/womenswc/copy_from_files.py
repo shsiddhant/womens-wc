@@ -3,6 +3,7 @@ from typing import TYPE_CHECKING
 import json
 import io
 import csv
+import hashlib
 from pathlib import Path
 
 if TYPE_CHECKING:
@@ -27,27 +28,27 @@ def city_country_table(
             cur.execute(
                 """
                 CREATE TEMPORARY TABLE city_country_temp (
+                venue TEXT,
                 city TEXT,
                 country TEXT,
-                venue TEXT,
                 UNIQUE (city, venue)
                 );
                 """
             )
             cur.copy_from(
                 file, "city_country_temp", sep=";", null="",
-                columns=("city", "country", "venue")
+                columns=("venue", "city", "country")
             )
             cur.execute(
                 """
                 INSERT INTO city_country (
-                city,
                 venue,
+                city,
                 country
                 )
                 SELECT DISTINCT ON (city, venue)
-                city,
                 venue,
+                city,
                 country
                 FROM city_country_temp
                 ON CONFLICT (city, venue) DO NOTHING;
@@ -83,8 +84,8 @@ def copy_json_to_table(
             )
     conn.commit()
 
-def json_explode(json_file_path, deliveries=[]):
-    with open(json_file_path, "r") as file:
+def json_explode(json_file_path, hash_id, deliveries=[]):
+    with open(json_file_path, "rb") as file:
         data = json.load(file)
     for n, inn in enumerate(data["innings"]):
         for o, over in enumerate(inn["overs"]):
@@ -93,6 +94,7 @@ def json_explode(json_file_path, deliveries=[]):
                 d["match_id"] = int(
                     Path(json_file_path).name.removesuffix(".json")
                 )
+                d["hash_id"] = hash_id
                 d["n_innings"] = n
                 d["team"] = inn["team"]
                 d["n_over"] = o
@@ -103,12 +105,14 @@ def json_explode(json_file_path, deliveries=[]):
 
 def copy_deliveries_json(
     conn: psycopg2.extensions.connection,
-    json_files
+    json_files,
+    hash_method = "md5",
 ) -> None:
     """
     """
     columns = [
         "match_id",
+        "hash_id",
         "n_innings",
         "team",
         "n_over",
@@ -119,7 +123,10 @@ def copy_deliveries_json(
     stdin = io.StringIO()
     writer = csv.DictWriter(stdin, fieldnames=columns)
     for match_json in json_files:
-        deliveries = json_explode(match_json, deliveries)
+        with open(match_json, "rb") as file:
+            digest = hashlib.file_digest(file, hash_method)
+            hash_id = digest.hexdigest()
+        deliveries = json_explode(match_json, hash_id, deliveries)
     writer.writerows(deliveries)
     stdin.seek(0)
     with conn.cursor() as cur:
