@@ -8,7 +8,8 @@ models:
       - name: venue_id
         description: "The primary key for this table"
         data_tests:
-          - dbt_constraints.primary_key
+          - unique
+          - not_null
       
       - name: venue_name
         data_tests: [not_null]
@@ -23,8 +24,9 @@ models:
     description: "Teams table"
     columns:
       - name: team_id
-        tests:
-          - dbt_constraints.primary_key
+        data_tests:
+          - unique
+          - not_null
 
       - name: team
         data_tests: [not_null]
@@ -36,37 +38,41 @@ models:
         data_tests: [not_null]
 
     tests:
-      - dbt_constraints.unique_key:
+      - dbt_utils.unique_combination_of_columns:
           arguments:
-            column_names: [team, format]
+            combination_of_columns:
+              - team
+              - format
 
   - name: players
     columns:
       - name: player_id
-        tests:
-          - dbt_constraints.primary_key
+        data_tests:
+          - unique
+          - not_null
 
       - name: player_name
         data_tests: [not_null]
 
       - name: team_id
-        tests:
-          - dbt_constraints.foreign_key:
+        data_tests:
+          - relationships:
               arguments:
-                pk_table_name: ref('teams')
-                pk_column_name: 'team_id'
+                to: ref('teams')
+                field: 'team_id'
+
   - name: matches
     columns:
       - name: match_id
-        tests:
-          - dbt_constraints.primary_key
+        data_tests:
+          - unique
 
       - name: venue_id
         tests:
-          - dbt_constraints.foreign_key:
+          - relationships:
               arguments:
-                pk_table_name: ref('venues')
-                pk_column_name: 'venue_id'
+                to: ref('venues')
+                field: 'venue_id'
 
       - name: start_date
         data_tests: [not_null]
@@ -74,18 +80,20 @@ models:
       - name: outcome_type
         data_tests: [not_null]
 
+
   - name: match_teams
     columns:
       - name: match_team_id
-        tests:
-          - dbt_constraints.primary_key
+        data_tests:
+          - unique
+          - not_null
 
       - name: match_id
         tests:
-          - dbt_constraints.foreign_key:
+          - relationships:
               arguments:
-                pk_table_name: ref('matches')
-                pk_column_name: 'match_id'
+                to: ref('matches')
+                field: 'match_id'
 
       - name: format
         data_tests: [not_null]
@@ -97,19 +105,21 @@ models:
         data_tests: [not_null]
     
     tests:
-      - dbt_constraints.unique_key:
+      - dbt_utils.unique_combination_of_columns:
           arguments:
-            column_names: [match_id, team]
+            combination_of_columns:
+              - match_id
+              - team
 
 
   - name: deliveries
     columns:
       - name: match_id
-        tests:
-          - dbt_constraints.foreign_key:
+        data_tests:
+          - relationships:
               arguments:
-                pk_table_name: ref('matches')
-                pk_column_name: 'match_id'
+                to: ref('matches')
+                field: 'match_id'
 
       - name: innings_number
         data_tests: [not_null]
@@ -127,18 +137,22 @@ models:
         data_tests: [not_null]
     
     tests:
-      - dbt_constraints.unique_key:
+      - dbt_utils.unique_combination_of_columns:
           arguments:
-            column_names: [match_id, innings_number, over_number, ball_in_over]
+            combination_of_columns:
+              - match_id
+              - innings_number
+              - over_number
+              - ball_in_over
 
   - name: innings
     columns:
       - name: match_id
-        tests:
-          - dbt_constraints.foreign_key:
+        data_tests:
+          - relationships:
               arguments:
-                pk_table_name: ref('matches')
-                pk_column_name: 'match_id'
+                to: ref('matches')
+                field: 'match_id'
 
       - name: innings_number
         data_tests: [not_null]
@@ -147,6 +161,8 @@ models:
         data_tests: [not_null]
 
     tests:
-      - dbt_constraints.unique_key:
+      - dbt_utils.unique_combination_of_columns:
           arguments:
-            column_names: [match_id, innings_number]
+            combination_of_columns:
+              - match_id
+              - innings_number

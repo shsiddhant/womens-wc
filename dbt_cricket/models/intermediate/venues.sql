@@ -25,7 +25,7 @@ venues_with_hash_id AS (
         info->>'venue' AS venue_name,
         hash_id,
         {{ dbt_utils.generate_surrogate_key(["info->>'venue'"]) }} AS venue_id,
-        info->>'city' AS city,
+        city,
         country,
         {{ dbt.current_timestamp() }} AS last_update
 

@@ -31,6 +31,7 @@ matches AS (
         
         staging.match_id,
         staging.hash_id,
+        staging.info->>'match_type' AS format,
         venues.venue_id,
         TO_DATE(staging.info->'dates'->> 0, 'YYYY-MM-DD') AS start_date,
         staging.info->'event'->>'name' AS event_name,
