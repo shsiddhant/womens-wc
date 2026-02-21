@@ -12,7 +12,10 @@ if TYPE_CHECKING:
 
 
 def city_country_table(
-    conn: psycopg2.extensions.connection, city_country_csv: str | Path,
+    conn: psycopg2.extensions.connection,
+    city_country_csv: str | Path,
+    schema: str = "womenswc"
+
 ) -> None:
     """
     Copy city_country CSV to the database.
@@ -28,38 +31,38 @@ def city_country_table(
             cur.execute(
                 """
                 CREATE TEMPORARY TABLE city_country_temp (
-                venue TEXT,
+                venue_name TEXT,
                 city TEXT,
                 country TEXT,
-                UNIQUE (city, venue)
+                UNIQUE (city, venue_name)
                 );
                 """
             )
             cur.copy_from(
                 file, "city_country_temp", sep=";", null="",
-                columns=("venue", "city", "country")
+                columns=("venue_name", "city", "country")
             )
             cur.execute(
-                """
-                INSERT INTO city_country (
-                venue,
+                f"""
+                INSERT INTO {schema}.city_country (
+                venue_name,
                 city,
                 country
                 )
-                SELECT DISTINCT ON (city, venue)
-                venue,
+                SELECT DISTINCT ON (city, venue_name)
+                venue_name,
                 city,
                 country
                 FROM city_country_temp
-                ON CONFLICT (city, venue) DO NOTHING;
+                ON CONFLICT (city, venue_name) DO NOTHING;
                 """
             )
-    conn.commit()
 
 def copy_json_to_table(
     conn: psycopg2.extensions.connection,
     json_files: list[str | Path],
-    json_table_name: str
+    schema: str = "womenswc",
+    json_table_name: str = "raw_json",
 ) -> None:
     """
     Copy JSON files as JSONB rows in a temp table.
@@ -79,10 +82,9 @@ def copy_json_to_table(
         data["match_id"] = int(match_json.name.removesuffix(".json"))
         with conn.cursor() as cur:
             cur.copy_expert(
-                f"COPY {json_table_name} (data) FROM STDIN",
+                f"COPY {schema}.{json_table_name} (data) FROM STDIN",
                 io.StringIO(json.dumps(data))
             )
-    conn.commit()
 
 def json_explode(json_file_path, hash_id, deliveries=[]):
     with open(json_file_path, "rb") as file:
@@ -106,6 +108,7 @@ def json_explode(json_file_path, hash_id, deliveries=[]):
 def copy_deliveries_json(
     conn: psycopg2.extensions.connection,
     json_files,
+    schema = "womenswc",
     hash_method = "md5",
 ) -> None:
     """
@@ -131,6 +134,6 @@ def copy_deliveries_json(
     stdin.seek(0)
     with conn.cursor() as cur:
         cur.copy_expert(
-            f"COPY deliveries_json ({','.join(columns)}) FROM STDIN WITH CSV",
+            f"COPY {schema}.deliveries_json ({','.join(columns)}) FROM STDIN WITH CSV",
             stdin
         )

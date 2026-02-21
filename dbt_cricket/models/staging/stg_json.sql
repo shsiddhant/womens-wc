@@ -28,17 +28,16 @@ staging AS (
         DISTINCT ON (match_id)
 
         (data->'match_id')::INTEGER AS match_id,
-        {{ dbt_utils.generate_surrogate_key(["data"]) }} AS hash_id,
+        {{ dbt_utils.generate_surrogate_key(["data", "ctc.city", "ctc.country"]) }} AS hash_id,
         data->'info' AS info,
+        ctc.city,
         ctc.country AS country,
         {{ dbt.current_timestamp() }} AS last_update
     
     FROM raw_json
     
     LEFT JOIN ctc
-        ON
-        (ctc.city = data->'info'->>'city') OR
-        (ctc.city IS NULL AND ctc.venue= data->'info'->>'venue')
+        ON ctc.venue_name= data->'info'->>'venue'
 
 )
 

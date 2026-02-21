@@ -36,6 +36,9 @@ data/raw/
 notebooks/playground.ipynb
 *.ipynb_checkpoints/
 
+# config
+
+config/.env
 
 # dbt
 
