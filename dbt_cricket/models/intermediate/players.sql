@@ -3,44 +3,43 @@
 {{
     config(
         materialized='incremental',
-        unique_key='player_id'
+        unique_key=['team_id', 'player_id']
     )
 }}
 
 ------------------------------------------------
 WITH
 
-staging AS (
-    
-    SELECT * FROM {{ ref('dbt_cricket', 'stg_json') }}
+teams as (
+
+    select * from {{ ref('dbt_cricket', 'teams') }}
 
 ),
 
-teams AS (
+match_players as (
 
-    SELECT * FROM {{ ref('dbt_cricket', 'teams') }}
+    select * from {{ ref('dbt_cricket', 'match_players') }}
 
 ),
 
 players AS (
     
     SELECT
-        DISTINCT ON (player_id)
-        staging.info->'registry'->'people'->>match_players_names.player_name AS player_id,
-        staging.hash_id,
-        match_players_names.player_name,
-        teams.team_id AS team_id
+        DISTINCT ON (team_id, player_id)
+        
+        teams.team_id AS team_id,
+        match_players.player_id,
+        match_players.hash_id,
+        match_players.player_name,
+        match_players.team,
+        match_players.format
 
-    FROM staging 
+    FROM match_players
     
-    CROSS JOIN
-        LATERAL jsonb_each(info->'players') AS match_players(team, players)
-    
-    CROSS JOIN
-        LATERAL jsonb_array_elements_text(match_players.players) AS match_players_names(player_name)
     
     JOIN teams
         ON match_players.team = teams.team
+        AND match_players.format = teams.format
 
 )
 
