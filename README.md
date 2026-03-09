@@ -37,6 +37,13 @@ Temporal cutoffs are enforced throughout the pipeline to prevent data leakage.
 4. Optionally persist feature datasets for reproducibility and experimentation
 5. Train and evaluate machine learning models
 
+```mermaid
+flowchart LR
+    A[Historical WODIs before WC2025] -->|Training data| B[Model]
+    B -->|Predictions| C[Women's World Cup 2025 Matches]
+    C -->|Compare| D[Actual Results]
+```
+
 ---
 
 ## Installation
@@ -222,11 +229,10 @@ feature logic evolves.
 Features are computed for **both teams** in each match:
 
 1. Home advantage
-2. Weighted batting averages and strike rates
-3. Weighted bowling averages and economy rates
-4. Weighted historical win percentage
+2. Chasing Advantage
+3. Team Strength Differential
 
-The last three are relative/differential values for the team and the opponent.
+Team Strength is calculated using (exponential decay weighted) cumulative stats: `0.01 * Win Percentage * Batting Average / Bowling Average`
 
 Future feature additions may include:
 
