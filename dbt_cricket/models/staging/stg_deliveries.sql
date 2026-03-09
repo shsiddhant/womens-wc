@@ -28,6 +28,7 @@ deliveries_staging AS (
         n_delivery AS ball_in_over,
      
         COALESCE ((delivery->'runs'->'total')::integer, 0) AS runs,
+        COALESCE ((delivery->'runs'->'batter')::integer, 0) AS batter_runs,
         COALESCE ((delivery->'extras'->'wides')::integer, 0) AS wides,
         COALESCE ((delivery->'extras'->'noballs')::integer, 0) AS noballs,
         COALESCE ((delivery->'extras'->'byes')::integer, 0) AS byes,
@@ -35,6 +36,7 @@ deliveries_staging AS (
         COALESCE ((delivery->'runs'->'extras')::integer, 0) AS extras,
         
         delivery->>'batter' AS batter,
+        delivery->>'non_striker' AS non_striker,
         delivery->>'bowler' AS bowler,
         
         ((delivery->'extras'->'wides') IS NULL) AND

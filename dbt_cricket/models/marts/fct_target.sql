@@ -4,7 +4,7 @@
 {{
     config(
         materialized='incremental',
-        unique_key='team_id'
+        unique_key='match_id'
     )
 }}
 
@@ -13,31 +13,39 @@
 WITH
 
 match_teams AS (
+
     SELECT * FROM {{ ref('dbt_cricket', 'match_teams') }}
+
 ),
 
-teams AS (
+features AS (
+
+    SELECT * FROM {{ ref('dbt_cricket', 'fct_features') }}
+
+),
+
+target AS (
 
     SELECT
-        DISTINCT ON (team, format)
-        {{ dbt_utils.generate_surrogate_key([
-            'team',
-            'format'
-            ])
-        }} AS team_id,
-        hash_id,
-        team,
-        format,
-        {{ dbt.current_timestamp() }} AS last_update
-    
+
+        DISTINCT ON (match_id)
+
+        match_id,
+        features.hash_id,
+        won_match AS result
+
     FROM match_teams
-    
+
+    JOIN features
+       USING (match_id, team)
+
 )
 
-SELECT * FROM teams
+SELECT * FROM target
 
 {% if is_incremental() %}
 
     WHERE hash_id NOT IN (SELECT DISTINCT hash_id FROM {{ this }})
 
 {% endif %}
+
