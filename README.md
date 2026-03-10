@@ -1,24 +1,19 @@
-# Women’s Cricket World Cup Outcome Prediction
+# Women’s Cricket World Cup 2025 Outcome Prediction
 
 ## Overview
 
-This project aims to predict match outcomes for the **Women’s Cricket World Cup 2025**
-using historical Women’s ODI (WODI) match data.
+This project aims to predict match outcomes for the **Women’s Cricket World Cup 2025** using historical Women’s ODI (WODI) match data.
 
-Raw ball-by-ball data from [Cricsheet](https://cricsheet.org/) is ingested into a
-**PostgreSQL relational database**, which serves as the primary source.
-Match-level features are generated directly from the database using SQL and Python
-and are then used to train and evaluate supervised machine learning models.
+Raw ball-by-ball data from [Cricsheet](https://cricsheet.org/) is ingested into a **PostgreSQL relational database**, which serves as the primary source.
+Match-level features are generated directly from the database using dbt SQL models, and are then used to train and evaluate supervised machine learning models.
 
-The project is designed to mirror a real-world prediction workflow, where only
-information available *prior* to a match is used for training and evaluation.
+The project is designed such that only information available prior to a match is used for training and evaluation.
 
 ---
 
 ## Problem Statement
 
-Given match-level features derived from historical ball-by-ball data,
-**can we predict the outcome of a Women’s Cricket World Cup match?**
+Given match-level features derived from historical ball-by-ball data, **can we predict the outcome of a Women’s Cricket World Cup match?**
 
 This is formulated as a **supervised learning** problem:
 
@@ -29,13 +24,7 @@ Temporal cutoffs are enforced throughout the pipeline to prevent data leakage.
 
 ---
 
-## Project Workflow
-
-1. Ingest raw Cricsheet JSON data into PostgreSQL
-2. Normalize and transform ball-by-ball data using SQL
-3. Generate match-level features directly from the database using date cutoffs
-4. Optionally persist feature datasets for reproducibility and experimentation
-5. Train and evaluate machine learning models
+## Machine Learning
 
 ```mermaid
 flowchart LR
@@ -115,62 +104,15 @@ This project uses PostgreSQL as the **canonical data store** for all cricket dat
 * **Schema:** Normalized relational tables (matches, innings, deliveries, players, etc.)
 * **Coverage:** All Women’s ODIs available on Cricsheet
 
----
 
-### SQL Scripts (`scripts/sql/`)
+### Pipeline
 
-The SQL scripts define the complete lifecycle of the data pipeline:
+The pipeline consists of two layers:
 
-1. **Initialization**
-
-   * Creates schemas, tables, constraints etc
-   * Intended to be run once per database
-
-2. **Ingestion and Transformation**
-
-   * Parses raw Cricsheet JSON data
-   * Inserts ball-by-ball data into normalized tables
-   * Applies data cleaning and transformations
-   
-
-3. **Feature Building**
-
-   * Aggregates ball-by-ball data into match-level features
-   * Uses parameterized SQL queries (`%s`) via psycopg2
-   * Produces feature-ready datasets for ML workflows
-   * Supports configurable date cutoffs
-
-All SQL queries use parameterized placeholders to safely handle dynamic inputs such as
-date ranges.
-
----
-
-## Python Modules
-
-Python code lives in:
-
-```text
-src/womenswc/
-```
-
-These modules are responsible for:
-
-* Managing PostgreSQL connections
-* Executing SQL scripts with runtime parameters
-* Coordinating feature generation from the database
-
-Functions are designed to accept database connection objects, keeping database logic
-decoupled from execution context and improving reusability.
-
----
-
-## Data Processing and Feature Engineering
-
-Raw ball-by-ball data is ingested into PostgreSQL and transformed using SQL queries.
-Match-level features are computed **directly from the database**, without creating
-an intermediate persisted base dataset.
-
-This design avoids duplication of data and keeps PostgreSQL as the single source of truth.
+1. **Ingestion:** A python script `scripts/python/ingest.py` parses raw Cricsheet JSON data, partially flattens it, and copies it to raw source tables `womenswc.raw_json` and `womenswc.deliveries_json`.   
+2. **Intermediate tables:** We create intermediate dbt models that load data from raw source tables and create a full normalized relational tables. These act as our source for analytic tables.
+3. **Analytic Marts:** We create analytics models from intermediate relational tables. Amongst these are our *features* and *target* tables. 
+4. **Snapshots:** For convenience of running notebooks, we've provided CSV snapshots of the feature and target datasets. The files may be found in the directory `data/processed`. 
 
 ---
 
@@ -190,24 +132,30 @@ To avoid positional or ordering bias:
 This prevents the model from learning spurious patterns based on team ordering,
 home/away conventions, or alphabetical bias.
 
----
 
-### Reproducibility vs Convenience
+### Using the Feature Dataset
 
 There are two supported ways to work with the feature dataset:
 
-1. **Dynamic generation (recommended)**
+1. **Dynamic generation**
+	 - Run the ingestion script
+		 ```shell
+		 cd womens-wc
+		 python scripts/python.ingest.py
+		 ```
+	  
+	     
+	- Run the dbt build command
+		```shell
+		 cd womens-wc/dbt_cricket
+		 dbt build -f
+		```
+	   
+   * Requires a running PostgreSQL database and properly configured dbt.
 
-   * Features are built by querying PostgreSQL
-   * Fully customizable date cutoffs
-   * Prevents data leakage
-   * Requires a running database
+2. **Snapshots**
 
-2. **Pre-generated dataset (convenience)**
-
-   * A snapshot of the feature table is included in the repository
-   * Allows notebooks to be run without PostgreSQL
-   * Feature definitions and date cutoffs are fixed
+   - For convenience of running notebooks, we've provided CSV snapshots of the feature and target datasets. The files may be found in the directory `data/processed`.
 
 The pre-generated feature dataset CSV can be found inside `data/processed/`
 
@@ -216,15 +164,7 @@ the PostgreSQL-backed pipeline should be used.
 
 ---
 
-### Design Note
-
-Feature datasets are intentionally snapshot-based when persisted to disk.
-This ensures experiments are reproducible even as the underlying database or
-feature logic evolves.
-
----
-
-## Features (So Far)
+## Features
 
 Features are computed for **both teams** in each match:
 
@@ -237,7 +177,7 @@ Team Strength is calculated using (exponential decay weighted) cumulative stats:
 Future feature additions may include:
 
 * Venue-specific effects
-* Spin vs pace bowling strength
+* Player matchups
 * Opposition-adjusted metrics
 
 ---
@@ -251,25 +191,16 @@ source .venv/bin/activate
 jupyter lab notebooks/
 ```
 
-The notebooks can be run in two modes:
-
-* **Offline mode:** Load the pre-generated feature dataset from
-  `data/processed/`
-* **Database-backed mode:** Query PostgreSQL to dynamically generate features using
-  custom date cutoffs
-
-By default, notebooks use the pre-generated dataset for ease of use.
-
 ---
 
 ## Roadmap
 
 * [x] Build PostgreSQL-backed data pipeline
 * [x] Feature engineering
-* [ ] Exploratory data analysis
-* [ ] Train baseline ML models
-* [ ] Evaluate model performance
-* [ ] Document results and insights
+* [x] Exploratory data analysis
+* [x] Train ML models
+* [x] Evaluate model performance
+* [x] Document results and insights
 
 ---
 
@@ -277,6 +208,7 @@ By default, notebooks use the pre-generated dataset for ease of use.
 
 * Python
 * PostgreSQL
+* dbt
 * pandas
 * numpy
 * matplotlib

@@ -2,11 +2,12 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 import numpy as np
 from sklearn.metrics import confusion_matrix
-from sklearn.linear_model import LogisticRegression
+from sklearn.base import clone, BaseEstimator
 
 if TYPE_CHECKING:
     from typing import Literal
     import pandas as pd
+    from sklearn.linear_model import LogisticRegression
 
 
 def train_validate_test(
@@ -39,22 +40,32 @@ def log_loss(
         )
     return loss
 
-def cross_validation_logisreg(
+def cross_validation(
+    model_input: BaseEstimator,
     X_train: np.ndarray[tuple[int, int]],
     Y_train: pd.Series,
-    n_parts: int = 9,
-    C: int = 1
+    min_first: int,
+    n_parts: int,
+    predict_prob: bool = False
     ):
     if not isinstance(n_parts, int) or n_parts <= 0:
         raise ValueError("n_parts must a positive integer.")
     size = len(X_train) // n_parts
-    indices = [size * k for k in range(1, n_parts, 1)]
-    prob_matrices = []
+    indices = [
+        min_first + size * k
+        for k in range(1, n_parts, 1)
+        if min_first + size * k < len(X_train)
+    ]
     conf_matrices = []
-    log_loss_values = []
     y_pred_values = []
+    if predict_prob:
+        probs = []
+        log_loss_values = []
+    else:
+        probs = None
+        log_loss_values = None
     for i in indices:
-        model = LogisticRegression(solver="lbfgs", max_iter=1000, C=C)
+        model = clone(model_input)
         x_train, y_train = X_train[:i], Y_train.iloc[:i]
         x_test, y_test = X_train[i:i + size], Y_train.iloc[i:i+size]
 
@@ -62,8 +73,17 @@ def cross_validation_logisreg(
 
         y_pred = model.predict(x_test)
         y_pred_values.append(y_pred)
-        prob_matrix = model.predict_proba(x_test)
-        prob_matrices.append(prob_matrix)
-        log_loss_values.append(log_loss(np.log(prob_matrix), y_test))
         conf_matrices.append(confusion_matrix(y_test, y_pred))
-    return conf_matrices, prob_matrices, log_loss_values, y_pred_values
+        if probs is not None and log_loss_values is not None:
+            model: LogisticRegression
+            prob = model.predict_proba(x_test)
+            probs.append(prob)
+            log_loss_values.append(log_loss(np.log(prob), y_test))
+    results = {
+            "CV_matrices": conf_matrices,
+            "CV_predictions": y_pred_values
+    }
+    if probs is not None and log_loss_values is not None:
+        results["CV_probabilities"] = probs
+        results["CV_log_loss"] = log_loss_values
+    return results
