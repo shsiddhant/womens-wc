@@ -33,7 +33,7 @@ env/
 data/raw/
 */docs/build/
 /docs/build/
-notebooks/playground.ipynb
+notebooks/experiments/
 *.ipynb_checkpoints/
 
 # config
